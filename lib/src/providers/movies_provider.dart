@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
  * Models 
  */
 import 'package:peliculas/src/models/movie_model.dart';
+import 'package:peliculas/src/models/actors_models.dart';
 
 class MoviesProvider {
   String _apikey = '66c2c8cb25a0824609eb7a7844ce1d08';
@@ -62,5 +63,20 @@ class MoviesProvider {
     sinkPopulars(_populars);
     _loading = false;
     return resp;
+  }
+
+  Future<List<Actor>> getCast(String movId) async {
+    final url = Uri.https(_url, '3/movie/$movId/credits',
+        {'api_key': _apikey, 'language': _language});
+    final resp = await http.get(url);
+    final decodedData = json.decode(resp.body);
+    final cast = new Cast.fromJsonList(decodedData['cast']);
+    return cast.actors;
+  }
+
+  Future<List<Movie>> findMovie(String query) async {
+    final url = Uri.https(_url, '3/search/movie',
+        {'api_key': _apikey, 'query': query, 'language': _language});
+    return await this._processResponse(url);
   }
 }
